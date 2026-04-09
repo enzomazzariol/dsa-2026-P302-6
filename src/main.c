@@ -1,85 +1,16 @@
 #include "sample_lib.h"
-#include <dirent.h>
+#include "house.h"
+#include "map.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/stat.h>
-#include <string.h>
-#define HOUSE_STREET_LENGHT 100
 
 void createaleak() {
   char *foo = malloc(20 * sizeof(char));
   printf("Allocated leaking string: %s", foo);
 }
 
-struct House {
-  char street[HOUSE_STREET_LENGHT];
-  int number;
-  double latitude;
-  double longitude;
-};
 
-struct HouseNodo{
-  struct House data;
-  struct HouseNodo *next;
-};
-
-struct HouseNodo* fetch_houses(FILE *file){
-  file = fopen("xs_1", "r");
-  if(file == NULL){
-    printf("[ERROR] File does not exist or incorrect path");
-  }
-
-  // Inicializamos variables para la lista de casas
-  struct HouseNodo *head = NULL;
-  struct HouseNodo *tail = NULL;
-  char line[256];
-  
-  while(fgets(line, sizeof(line), file)){
-    struct House newHouse;
-    struct HouseNodo *new_nodo = NULL;
-
-    // espacio en memoria para cada casa
-    new_nodo = (struct HouseNodo *)malloc(sizeof(struct HouseNodo));
-
-    if(!new_nodo){
-      printf("[ERROR] Memory allocation failed\n");
-      return;
-    }
-
-    // leemos data del archivo house.txt
-    char street[HOUSE_STREET_LENGHT];
-    int number;
-    double lat;
-    double lon;
-    sscanf(line, "%[^,],%d,%lf,%lf", street, &number, &lat, &lon);
-
-    strcpy(newHouse.street, street);
-    newHouse.number = number;
-    newHouse.latitude = lat;
-    newHouse.longitude = lon;
-
-    // guardamos en la lista enlazada
-    new_nodo->data = newHouse;
-    new_nodo->next = NULL;
-
-    if(head == NULL){
-      head = new_nodo;
-      tail = new_nodo;
-    } else{
-      tail->next = new_nodo;
-      tail = new_nodo;
-    };
-  }
-
-  return head;
-  fclose(file);
-}
-
-void search_house(char *house_name){
-  
-}
-
-int main() {
+int main(void) {
   printf("*****************\nWelcome to DSA!\n*****************\n");
 
   // how to import and call a function
@@ -89,9 +20,52 @@ int main() {
   // createaleak();
 
   int user_map = 0;
-  printf("Enter a map number: \n 1. xs_1 \n 2. xs_2 \n 3. md_1 \n 4. md_1 \n 5. lg_1 \n 6. xl_1 \n 7. 2xl_1 \n");
+  print_map_menu();
   scanf("%d", &user_map);
   printf("Has elegido el mapa: %d", user_map);
 
+  const char *map_name = map_name_from_option(user_map);
+  if (map_name == NULL) {
+    printf("\n[ERROR] Mapa invalido\n");
+    return 1;
+  }
+
+  HouseNode *houses = fetch_houses(map_name);
+  if (houses == NULL) {
+    printf("[ERROR] No se pudieron cargar las casas\n");
+    return 1;
+  }
+
+  // imprimimos el load y el total de casas
+  int total_houses = count_houses(houses);
+  printf("\nCasas cargadas correctamente para %s, total: %d\n", map_name, total_houses);
+
+  int opcion_user = 0;
+  print_map_options();
+  scanf("%d", &opcion_user);
+
+  switch (opcion_user) {
+    case 1: {
+      printf("Enter a street name: \n");
+      char street_name[256];
+      scanf(" %255[^\n]", street_name);
+      printf("Enter a street number: \n");
+      int street_number;
+      scanf("%d", &street_number);
+      search_house(houses, street_name, street_number);
+      break;
+    }
+    case 2:
+      printf("Not implemented yet. Come back later. \n");
+      break;
+    case 3:
+      printf("Not implemented yet. Come back later. \n");
+      break;
+    default:
+      printf("[ERROR] Operación inválida\n");
+      return 1;
+  }
+
+  free_houses(houses);
   return 0;
 }
