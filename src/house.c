@@ -14,6 +14,7 @@ HouseNode *fetch_houses(const char *map_name) {
     return NULL;
   }
 
+  
   HouseNode *head = NULL;
   HouseNode *tail = NULL;
   char line[256];
