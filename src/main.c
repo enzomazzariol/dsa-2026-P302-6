@@ -3,12 +3,15 @@
 #include "map.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 
 void createaleak() {
   char *foo = malloc(20 * sizeof(char));
   printf("Allocated leaking string: %s", foo);
 }
 
+// void compare_house_name(*char );
 
 int main(void) {
   printf("*****************\nWelcome to DSA!\n*****************\n");
@@ -49,6 +52,7 @@ int main(void) {
       printf("Enter a street name: \n");
       char street_name[256];
       scanf(" %255[^\n]", street_name);
+      
       printf("Enter a street number: \n");
       int street_number;
       scanf("%d", &street_number);

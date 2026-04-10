@@ -3,25 +3,29 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
-HouseNode *fetch_houses(const char *map_name) {
+HouseNode *fetch_houses(const char *map_name)
+{
   char file_path[256];
   snprintf(file_path, sizeof(file_path), "maps/%s/houses.txt", map_name);
 
   FILE *file = fopen(file_path, "r");
-  if (file == NULL) {
+  if (file == NULL)
+  {
     printf("[ERROR] Fichero no encontrado o ruta incorrecta: %s\n", file_path);
     return NULL;
   }
 
-  
   HouseNode *head = NULL;
   HouseNode *tail = NULL;
   char line[256];
 
-  while (fgets(line, sizeof(line), file)) {
+  while (fgets(line, sizeof(line), file))
+  {
     HouseNode *new_node = (HouseNode *)malloc(sizeof(HouseNode));
-    if (new_node == NULL) {
+    if (new_node == NULL)
+    {
       printf("[ERROR] fallo en la asignacion de memoria\n");
       fclose(file);
       free_houses(head);
@@ -33,7 +37,8 @@ HouseNode *fetch_houses(const char *map_name) {
     double lat;
     double lon;
     int parsed = sscanf(line, "%99[^,],%d,%lf,%lf", street, &number, &lat, &lon);
-    if (parsed != 4) {
+    if (parsed != 4)
+    {
       free(new_node);
       continue;
     }
@@ -44,10 +49,13 @@ HouseNode *fetch_houses(const char *map_name) {
     new_node->data.longitude = lon;
     new_node->next = NULL;
 
-    if (head == NULL) {
+    if (head == NULL)
+    {
       head = new_node;
       tail = new_node;
-    } else {
+    }
+    else
+    {
       tail->next = new_node;
       tail = new_node;
     }
@@ -57,11 +65,24 @@ HouseNode *fetch_houses(const char *map_name) {
   return head;
 }
 
-void search_house(HouseNode *houses, const char *house_name, int house_number) {
+void search_house(HouseNode *houses, const char *house_name, int house_number)
+{
   HouseNode *current = houses;
-  while (current != NULL) {
-    if (strcmp(current->data.street, house_name) == 0 &&
-        current->data.number == house_number) {
+  char input_lower[100] = house_name;
+  
+
+  for(int i = 0; i < 100; i++){
+    towlower(input_lower[i]);
+    towlower(current->data.street[i])
+  }
+
+  while (current != NULL)
+  {
+    char current_lower[100];
+    
+    if (strcmp(current_lower, input_lower) == 0 &&
+        current->data.number == house_number)
+    {
       printf("House found: lat=%.6f lon=%.6f\n",
              current->data.latitude,
              current->data.longitude);
@@ -73,11 +94,13 @@ void search_house(HouseNode *houses, const char *house_name, int house_number) {
   printf("[ERROR] House not found\n");
 }
 
-int count_houses(HouseNode *head) {
+int count_houses(HouseNode *head)
+{
   int total = 0;
   HouseNode *current = head;
 
-  while (current != NULL) {
+  while (current != NULL)
+  {
     total++;
     current = current->next;
   }
@@ -85,9 +108,11 @@ int count_houses(HouseNode *head) {
   return total;
 }
 
-void free_houses(HouseNode *head) {
+void free_houses(HouseNode *head)
+{
   HouseNode *current = head;
-  while (current != NULL) {
+  while (current != NULL)
+  {
     HouseNode *next = current->next;
     free(current);
     current = next;
