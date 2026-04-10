@@ -68,32 +68,16 @@ HouseNode *fetch_houses(const char *map_name)
 void search_house(HouseNode *houses, const char *house_name, int house_number)
 {
   HouseNode *current = houses;
-  char input_lower[100] = house_name;
-  
-
-  for(int i = 0; i < 100; i++){
-    towlower(input_lower[i]);
-    towlower(current->data.street[i])
-  }
-
-  while (current != NULL)
-  {
-    char current_lower[100];
-    
-    if (strcmp(current_lower, input_lower) == 0 &&
-        current->data.number == house_number)
-    {
-      printf("House found: lat=%.6f lon=%.6f\n",
-             current->data.latitude,
-             current->data.longitude);
+  while (current != NULL){
+    if(strcasecmp(current->data.street, house_name) == 0 && current->data.number == house_number){
+      printf("House found: Latitud = %.6f, Longitud = %.6f\n", current->data.latitude, current->data.longitude);
       return;
     }
     current = current->next;
-  }
 
+  } 
   printf("[ERROR] House not found\n");
 }
-
 int count_houses(HouseNode *head)
 {
   int total = 0;
