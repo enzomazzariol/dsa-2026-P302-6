@@ -1,6 +1,7 @@
 #include "sample_lib.h"
 #include "house.h"
 #include "map.h"
+#include "places.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -34,6 +35,12 @@ int main(void) {
   }
 
   HouseNode *houses = fetch_houses(map_name);
+  PlaceNode *places = load_places(map_name);
+
+  if (places == NULL) {
+      printf("[ERROR] No se pudieron cargar los lugares\n");
+      return 1;
+  }
   if (houses == NULL) {
     printf("[ERROR] No se pudieron cargar las casas\n");
     return 1;
@@ -41,7 +48,9 @@ int main(void) {
 
   // imprimimos el load y el total de casas
   int total_houses = count_houses(houses);
+  int total_places = count_places(places);
   printf("\nCasas cargadas correctamente para %s, total: %d\n", map_name, total_houses);
+  printf("\nLugares cargados correctamente para %s, total: %d\n", map_name, total_places);
 
   int opcion_user = 0;
   print_map_options();
@@ -59,12 +68,16 @@ int main(void) {
       search_house(houses, street_name, street_number);
       break;
     }
-    case 2:
+    case 2: {
       printf("Not implemented yet. Come back later. \n");
       break;
-    case 3:
-      printf("Not implemented yet. Come back later. \n");
+    }
+    case 3: {
+      printf("Enter the name of the place: \n");
+      char name_place[256];
+      scanf(" %255[^\n]", name_place);
       break;
+    }
     default:
       printf("[ERROR] Operación inválida\n");
       return 1;
