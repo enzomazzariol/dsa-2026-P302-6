@@ -1,6 +1,6 @@
 #include "house.h"
+#include "algoritmos.h"
 #include "abreviaturas.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
