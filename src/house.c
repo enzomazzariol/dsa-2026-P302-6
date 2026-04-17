@@ -66,25 +66,57 @@ HouseNode *fetch_houses(const char *map_name)
   return head;
 }
 
-void search_house(HouseNode *houses, const char *house_name, int house_number){
-  HouseNode *current = houses;
+void search_house(HouseNode *houses, const char *house_name, int house_number) {
+    HouseNode *current = houses;
 
-  while (current != NULL){
-    if(strcasecmp(current->data.street, house_name) == 0 && current->data.number == house_number){
-      printf("House found: Latitud = %.6f, Longitud = %.6f\n", current->data.latitude, current->data.longitude);
-      return;
-    }else if(strcasecmp(current->data.street, abreviaturas(house_name)) == 0 && current->data.number == house_number){
-      printf("House found: Latitud = %.6f, Longitud = %.6f\n", current->data.latitude, current->data.longitude);
-      return;
+    while (current != NULL) {
+        const char *abbr = abreviaturas(house_name);
+
+        if (current->data.number == house_number && (strcasecmp(current->data.street, house_name) == 0 ||strcasecmp(current->data.street, abbr) == 0)) {
+            printf("House found: Latitud = %.6f, Longitud = %.6f\n",current->data.latitude, current->data.longitude);
+            return;
+        }
+        current = current->next;
     }
+
     
-  current = current->next;
+    int street_found = 0;
+    current = houses;
 
-  }
+    while (current != NULL) {
+        const char *abbr = abreviaturas(house_name);
 
+        if (strcasecmp(current->data.street, house_name) == 0 || strcasecmp(current->data.street, abbr) == 0) {
+            street_found = 1;
+            break;
+        }
+        current = current->next;
+    }
 
+    if (street_found) {
+        
+        printf("No se ha encontrado el número proporcionado. ");
+        printf("Números disponibles en esta calle: ");
 
-  printf("[ERROR] House not found\n");
+        current = houses;
+        while (current != NULL) {
+            const char *abbr = abreviaturas(house_name);
+
+            if (strcasecmp(current->data.street, house_name) == 0 ||
+                strcasecmp(current->data.street, abbr) == 0) {
+                printf("%d ", current->data.number);
+            }
+            current = current->next;
+        }
+
+        printf("\nEnter the correct house number: \n");
+        scanf("%d", &house_number);
+        search_house(houses, house_name, house_number);  // llamada recursiva
+
+    } else {
+        
+        printf("[ERROR] House not found\n");
+    }
 }
 
 int count_houses(HouseNode *head){ 
