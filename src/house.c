@@ -1,4 +1,5 @@
 #include "house.h"
+#include "algoritmos.h"
 
 #include <stdio.h>
 #include <stdlib.h>
