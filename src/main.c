@@ -35,14 +35,16 @@ int main(void) {
   }
 
   HouseNode *houses = fetch_houses(map_name);
-  PlaceNode *places = load_places(map_name);
+  PlaceNode *places = fetch_places(map_name);
 
   if (places == NULL) {
       printf("[ERROR] No se pudieron cargar los lugares\n");
+      free_houses(houses);
       return 1;
   }
   if (houses == NULL) {
     printf("[ERROR] No se pudieron cargar las casas\n");
+    free_places(places);
     return 1;
   }
 
@@ -50,7 +52,7 @@ int main(void) {
   int total_houses = count_houses(houses);
   int total_places = count_places(places);
   printf("\nCasas cargadas correctamente para %s, total: %d\n", map_name, total_houses);
-  printf("\nLugares cargados correctamente para %s, total: %d\n", map_name, total_places);
+  printf("Lugares cargados correctamente para %s, total: %d\n", map_name, total_places);
 
   int opcion_user = 0;
   print_map_options();
@@ -76,13 +78,16 @@ int main(void) {
       printf("Enter the name of the place: \n");
       char name_place[256];
       scanf(" %255[^\n]", name_place);
+      search_place(places, name_place);
       break;
     }
     default:
-      printf("[ERROR] Operación inválida\n");
+      free_houses(houses);
+      free_places(places);
       return 1;
   }
 
   free_houses(houses);
+  free_places(places);
   return 0;
 }

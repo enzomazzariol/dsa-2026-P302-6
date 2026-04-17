@@ -12,14 +12,17 @@ typedef struct Place {
 
 typedef struct PlaceNode {
   Place data;
-  struct PlaceNodo *next;
+  struct PlaceNode *next; 
 } PlaceNode;
 
-int count_places(const char* filename);
+int count_places(PlaceNode *head);
 
-int load_places(const char* filename);
+PlaceNode* fetch_places(const char *map_name);
 
-Place* search_place(const char* name, Place* places, int num_places);
+void search_place(PlaceNode* places, const char* name);
+
+void free_places(PlaceNode *head);
+
 
 
 #endif
