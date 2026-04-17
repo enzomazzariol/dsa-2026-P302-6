@@ -27,7 +27,7 @@ PlaceNode *fetch_places(const char *map_name)
     {
       printf("[ERROR] fallo en la asignacion de memoria\n");
       fclose(file);
-      free_houses(head);
+      free_places(head);
       return NULL;
     }
 
@@ -37,7 +37,7 @@ PlaceNode *fetch_places(const char *map_name)
     double latitude;
     double longitude;
     int parsed = sscanf(line,
-    "%36[^,],%255[^,],%255[^,],%lf,%lf", id, place, amenity, &latitude, &longitude);    
+    "%36[^,],%49[^,],%49[^,],%lf,%lf", id, place, amenity, &latitude, &longitude);    
     if (parsed != 5)
     {
       free(new_node);
@@ -67,6 +67,19 @@ PlaceNode *fetch_places(const char *map_name)
   return head;
 }
 
+void search_place(PlaceNode *places, const char *place_name)
+{
+  PlaceNode *current = places;
+  while (current != NULL){
+    if(strcasecmp(current->data.place, place_name) == 0){
+      printf("Place found: Latitud = %.6f, Longitud = %.6f\n", current->data.latitude, current->data.longitude);
+      return;
+    }
+    current = current->next;
+
+  } 
+  printf("[ERROR] Place not found\n");
+}
 
 int count_places(PlaceNode *head)
 {
@@ -80,4 +93,15 @@ int count_places(PlaceNode *head)
   }
 
   return total;
+}
+
+void free_places(PlaceNode *head)
+{
+  PlaceNode *current = head;
+  while (current != NULL)
+  {
+    PlaceNode *next = current->next;
+    free(current);
+    current = next;
+  }
 }

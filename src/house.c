@@ -1,6 +1,6 @@
 #include "house.h"
 #include "algoritmos.h"
-
+#include "abreviaturas.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -66,21 +66,28 @@ HouseNode *fetch_houses(const char *map_name)
   return head;
 }
 
-void search_house(HouseNode *houses, const char *house_name, int house_number)
-{
+void search_house(HouseNode *houses, const char *house_name, int house_number){
   HouseNode *current = houses;
+
   while (current != NULL){
     if(strcasecmp(current->data.street, house_name) == 0 && current->data.number == house_number){
       printf("House found: Latitud = %.6f, Longitud = %.6f\n", current->data.latitude, current->data.longitude);
       return;
+    }else if(strcasecmp(current->data.street, abreviaturas(house_name)) == 0 && current->data.number == house_number){
+      printf("House found: Latitud = %.6f, Longitud = %.6f\n", current->data.latitude, current->data.longitude);
+      return;
     }
-    current = current->next;
+    
+  current = current->next;
 
-  } 
+  }
+
+
+
   printf("[ERROR] House not found\n");
 }
-int count_houses(HouseNode *head)
-{
+
+int count_houses(HouseNode *head){ 
   int total = 0;
   HouseNode *current = head;
 
