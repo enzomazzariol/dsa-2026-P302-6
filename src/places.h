@@ -23,7 +23,4 @@ void search_place(PlaceNode* places, const char* name);
 
 void free_places(PlaceNode *head);
 
-
-
 #endif
-
