@@ -1,3 +1,3 @@
 #!/bin/bash
 echo 'Iniciando comprobacion...'
-make cf
+clang-format --dry-run -Werror **/*.c **/*.h
