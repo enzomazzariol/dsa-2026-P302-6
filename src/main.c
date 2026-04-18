@@ -38,9 +38,9 @@ int main(void) {
   PlaceNode *places = fetch_places(map_name);
 
   if (places == NULL) {
-      printf("[ERROR] No se pudieron cargar los lugares\n");
-      free_houses(houses);
-      return 1;
+    printf("[ERROR] No se pudieron cargar los lugares\n");
+    free_houses(houses);
+    return 1;
   }
   if (houses == NULL) {
     printf("[ERROR] No se pudieron cargar las casas\n");

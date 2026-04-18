@@ -115,7 +115,7 @@ void search_house(HouseNode *houses, const char *house_name, int house_number) {
 
     } else {
         
-        printf("[ERROR] House not found\n");
+      printf("[ERROR] House not found\n");
     }
 }
 
