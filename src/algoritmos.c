@@ -11,7 +11,7 @@ int minimo(int a, int b, int c) {
     return min;
 }
 
-int LevenshteinDistance(const char *a, const char *b) {
+int levenshtein_distance(const char *a, const char *b) {
     int m = strlen(a);
     int n = strlen(b);
 

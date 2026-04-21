@@ -2,6 +2,6 @@
 #define ALGORITMOS_H
 
 int minimo(int a, int b, int c);
-int LevenshteinDistance(const char *a, const char *b);
+int levenshtein_distance(const char *a, const char *b);
 
 #endif

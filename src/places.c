@@ -4,6 +4,29 @@
 #include <string.h>
 #include <ctype.h>
 
+PlaceNode *init_place_list() {
+  return NULL;
+}
+
+void append_place(PlaceNode **head, PlaceNode **tail, Place data) {
+  PlaceNode *new_node = (PlaceNode *)malloc(sizeof(PlaceNode));
+  if (new_node == NULL) {
+    printf("[ERROR] fallo en la asignacion de memoria\n");
+    return;
+  }
+
+  new_node->data = data;
+  new_node->next = NULL;
+
+  if (*head == NULL) {
+    *head = new_node;
+    *tail = new_node;
+  } else {
+    (*tail)->next = new_node;
+    *tail = new_node;
+  }
+}
+
 PlaceNode *fetch_places(const char *map_name)
 {
   char file_path[256];
@@ -16,51 +39,19 @@ PlaceNode *fetch_places(const char *map_name)
     return NULL;
   }
 
-  PlaceNode *head = NULL;
+  PlaceNode *head = init_place_list();
   PlaceNode *tail = NULL;
   char line[256];
 
   while (fgets(line, sizeof(line), file))
   {
-    PlaceNode *new_node = (PlaceNode *)malloc(sizeof(PlaceNode));
-    if (new_node == NULL)
-    {
-      printf("[ERROR] fallo en la asignacion de memoria\n");
-      fclose(file);
-      free_places(head);
-      return NULL;
-    }
-
-    char id[37]; 
-    char place[PLACE_LENGTH];
-    char amenity[PLACE_LENGTH];
-    double latitude;
-    double longitude;
-    int parsed = sscanf(line,
-    "%36[^,],%49[^,],%49[^,],%lf,%lf", id, place, amenity, &latitude, &longitude);    
+    Place p;
+    int parsed = sscanf(line, "%36[^,],%49[^,],%49[^,],%lf,%lf",
+                        p.id, p.place, p.amenity, &p.latitude, &p.longitude);
     if (parsed != 5)
-    {
-      free(new_node);
       continue;
-    }
 
-    strcpy(new_node->data.id, id);
-    strcpy(new_node->data.place, place);
-    strcpy(new_node->data.amenity, amenity);
-    new_node->data.latitude = latitude;
-    new_node->data.longitude = longitude;
-    new_node->next = NULL;
-
-    if (head == NULL)
-    {
-      head = new_node;
-      tail = new_node;
-    }
-    else
-    {
-      tail->next = new_node;
-      tail = new_node;
-    }
+    append_place(&head, &tail, p);
   }
 
   fclose(file);

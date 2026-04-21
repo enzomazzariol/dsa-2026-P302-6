@@ -15,12 +15,11 @@ typedef struct PlaceNode {
   struct PlaceNode *next; 
 } PlaceNode;
 
+PlaceNode *init_place_list();
+void append_place(PlaceNode **head, PlaceNode **tail, Place data);
 int count_places(PlaceNode *head);
-
 PlaceNode* fetch_places(const char *map_name);
-
 void search_place(PlaceNode* places, const char* name);
-
 void free_places(PlaceNode *head);
 
 #endif

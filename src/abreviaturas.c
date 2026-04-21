@@ -3,7 +3,7 @@
 #include "abreviaturas.h"
 
 const char* abreviaturas(const char* abreviada){
-    char final_abreviada[100]; 
+    static char final_abreviada[100]; 
 
     int variable = -1;
     int longitud = strlen(abreviada);

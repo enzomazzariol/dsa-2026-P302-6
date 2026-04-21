@@ -66,7 +66,10 @@ int main(void) {
       
       printf("Enter a street number: \n");
       int street_number;
-      scanf("%d", &street_number);
+      if (scanf("%d", &street_number) != 1) {
+        printf("[ERROR] Numero invalido\n");
+        break;
+      }
       search_house(houses, street_name, street_number);
       break;
     }
