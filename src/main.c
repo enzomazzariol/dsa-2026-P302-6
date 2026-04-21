@@ -18,6 +18,7 @@ int main(void) {
   printf("*****************\nWelcome to DSA!\n*****************\n");
 
   // how to import and call a function
+  
   printf("Factorial of 4 is %d\n", fact(4));
 
   // uncomment and run "make v" to see how valgrind detects memory leaks
@@ -38,9 +39,9 @@ int main(void) {
   PlaceNode *places = fetch_places(map_name);
 
   if (places == NULL) {
-      printf("[ERROR] No se pudieron cargar los lugares\n");
-      free_houses(houses);
-      return 1;
+    printf("[ERROR] No se pudieron cargar los lugares\n");
+    free_houses(houses);
+    return 1;
   }
   if (houses == NULL) {
     printf("[ERROR] No se pudieron cargar las casas\n");

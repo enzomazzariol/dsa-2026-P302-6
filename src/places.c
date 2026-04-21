@@ -67,8 +67,7 @@ void search_place(PlaceNode *places, const char *place_name)
       return;
     }
     current = current->next;
-
-  } 
+  }
   printf("[ERROR] Place not found\n");
 }
 

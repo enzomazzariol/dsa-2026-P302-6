@@ -59,84 +59,56 @@ HouseNode *fetch_houses(const char *map_name)
   return head;
 }
 
-void insert_match(Match results[], int *count, HouseNode *node, int dist) {
-    if (*count < MAX_RESULTS) {
-        results[*count].node = node;
-        results[*count].distance = dist;
-        (*count)++;
-    } else if (dist >= results[*count - 1].distance) {
-        return; 
+void search_house(HouseNode *houses, const char *house_name, int house_number) {
+    HouseNode *current = houses;
+
+    while (current != NULL) {
+        const char *abbr = abreviaturas(house_name);
+
+        if (current->data.number == house_number && (strcasecmp(current->data.street, house_name) == 0 || strcasecmp(current->data.street, abbr) == 0)) {
+            printf("House found: Latitud = %.6f, Longitud = %.6f\n", current->data.latitude, current->data.longitude);
+            return;
+        }
+        current = current->next;
+    }
+
+    int street_found = 0;
+    current = houses;
+
+    while (current != NULL) {
+        const char *abbr = abreviaturas(house_name);
+
+        if (strcasecmp(current->data.street, house_name) == 0 || strcasecmp(current->data.street, abbr) == 0) {
+            street_found = 1;
+            break;
+        }
+        current = current->next;
+    }
+
+    if (street_found) {
+        printf("No se ha encontrado el número proporcionado. ");
+        printf("Números disponibles en esta calle: ");
+
+        current = houses;
+        while (current != NULL) {
+            const char *abbr = abreviaturas(house_name);
+
+            if (strcasecmp(current->data.street, house_name) == 0 || strcasecmp(current->data.street, abbr) == 0) {
+                printf("%d ", current->data.number);
+            }
+            current = current->next;
+        }
+
+        printf("\nEnter the correct house number: \n");
+        int new_number;
+        if (scanf("%d", &new_number) == 1) {
+            search_house(houses, house_name, new_number);
+        } else {
+            printf("[ERROR] Numero invalido\n");
+        }
     } else {
-        results[*count - 1].node = node;
-        results[*count - 1].distance = dist;
+        printf("[ERROR] House not found\n");
     }
-
-    // ordenar (insertion sort pequeño)
-    for (int i = *count - 1; i > 0; i--) {
-        if (results[i].distance < results[i - 1].distance) {
-            Match temp = results[i];
-            results[i] = results[i - 1];
-            results[i - 1] = temp;
-        }
-    }
-}
-
-void to_lowercase(const char *input, char *output, int size) {
-  int i;
-  for (i = 0; i < size - 1 && input[i] != '\0'; i++) {
-    output[i] = tolower(input[i]);
-  }
-  output[i] = '\0';
-}
-
-void search_house(HouseNode *houses, const char *house_name, int house_number){
-  HouseNode *current = houses;
-  HouseNode *best_match = NULL;
-  int best_distance = 9999;
-
-  char house_name_lower[HOUSE_STREET_LENGTH];
-  to_lowercase(house_name, house_name_lower, HOUSE_STREET_LENGTH);
-
-  while (current != NULL){
-    int limite = 3;
-    if(current->data.number == house_number){
-
-      char street_lower[HOUSE_STREET_LENGTH];
-      to_lowercase(current->data.street, street_lower, HOUSE_STREET_LENGTH);
-
-      int len1 = strlen(street_lower);
-      int len2 = strlen(house_name_lower);
-
-      // filtro para optimizar levenshtein_distance
-      if(abs(len1 - len2) <= limite){
-        int distance = levenshtein_distance(street_lower, house_name_lower);
-        int distance_abbr = levenshtein_distance(street_lower, abreviaturas(house_name_lower));
-        int final_distance = 0;
-
-        if(distance < distance_abbr){
-          final_distance = distance;
-        } else{
-          final_distance = distance_abbr;
-        }
-
-        if(final_distance < best_distance){
-          best_distance = final_distance;
-          best_match = current;
-        }
-
-        if(final_distance == 0)
-          break;
-      }
-
-    }
-    current = current->next;
-  }
-  if (best_match != NULL && best_distance <= 3) {
-    printf("House found: %s %d\n", best_match->data.street, best_match->data.number);
-    printf("Lat = %.6f, Lon = %.6f\n", best_match->data.latitude, best_match->data.longitude);
-  } else {
-    printf("[ERROR] House not found\n");
-  }
 }
 
 int count_houses(HouseNode *head){ 

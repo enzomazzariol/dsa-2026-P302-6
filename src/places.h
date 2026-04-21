@@ -3,7 +3,7 @@
 #define PLACE_LENGTH 50
 
 typedef struct Place {
-  char id[37]; 
+  char id[37];
   char place[PLACE_LENGTH];
   char amenity[PLACE_LENGTH];
   double latitude;
@@ -12,7 +12,7 @@ typedef struct Place {
 
 typedef struct PlaceNode {
   Place data;
-  struct PlaceNode *next; 
+  struct PlaceNode *next;
 } PlaceNode;
 
 PlaceNode *init_place_list();
