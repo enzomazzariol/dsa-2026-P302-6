@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#define MAX_SUGERENCIAS 5
 
 HouseNode *init_house_list() {
   return NULL;
@@ -60,54 +61,112 @@ HouseNode *fetch_houses(const char *map_name)
 }
 
 void search_house(HouseNode *houses, const char *house_name, int house_number) {
-    HouseNode *current = houses;
+  // Expandimos la abreviatura una sola vez antes del loop para no recalcularla en cada iteracion
+  char abbr[100];
+  abreviaturas(house_name, abbr, sizeof(abbr));
 
-    while (current != NULL) {
-        const char *abbr = abreviaturas(house_name);
+  HouseNode *current = houses;
+  int street_found = 0;
 
-        if (current->data.number == house_number && (strcasecmp(current->data.street, house_name) == 0 || strcasecmp(current->data.street, abbr) == 0)) {
-            printf("House found: Latitud = %.6f, Longitud = %.6f\n", current->data.latitude, current->data.longitude);
-            return;
-        }
-        current = current->next;
+  // Primer recorrido: buscamos la calle y el numero exacto simultaneamente
+  while (current != NULL) {
+    // Aceptamos tanto el nombre original como su forma expandida (ej: "c Exemple" -> "carrer Exemple")
+    int calle_ok = strcasecmp(current->data.street, house_name) == 0 ||
+                   strcasecmp(current->data.street, abbr) == 0;
+
+    if (calle_ok) {
+      street_found = 1;
+      if (current->data.number == house_number) {
+        printf("House found: Latitud = %.6f, Longitud = %.6f\n", current->data.latitude, current->data.longitude);
+        return;
+      }
     }
+    current = current->next;
+  }
 
-    int street_found = 0;
+  if (street_found) {
+    // La calle existe pero el numero no: listamos los disponibles y pedimos uno nuevo
+    printf("Number not found in the specified street. ");
+    printf("Available numbers in this street: ");
     current = houses;
-
     while (current != NULL) {
-        const char *abbr = abreviaturas(house_name);
+      if (strcasecmp(current->data.street, house_name) == 0 || strcasecmp(current->data.street, abbr) == 0) {
+        printf("%d ", current->data.number);
+      }
+      current = current->next;
+    }
+    printf("\nEnter the correct house number: ");
+    int new_house_number = 0;
+    if (scanf("%d", &new_house_number) == 1) {
+      search_house(houses, house_name, new_house_number);
+    } else {
+      printf("[ERROR] Numero invalido\n");
+    }
+  } else {
+    // La calle no existe: buscamos las mas parecidas usando distancia de Levenshtein
+    char sugeridas[MAX_SUGERENCIAS][HOUSE_STREET_LENGTH];
+    int distancias[MAX_SUGERENCIAS];
 
-        if (strcasecmp(current->data.street, house_name) == 0 || strcasecmp(current->data.street, abbr) == 0) {
-            street_found = 1;
-            break;
-        }
-        current = current->next;
+    // Inicializamos con distancia "infinita" para que cualquier calle real entre al ranking
+    for (int i = 0; i < MAX_SUGERENCIAS; i++) {
+      sugeridas[i][0] = '\0';
+      distancias[i] = 9999;
     }
 
-    if (street_found) {
-        printf("No se ha encontrado el número proporcionado. ");
-        printf("Números disponibles en esta calle: ");
+    current = houses;
+    while (current != NULL) {
+      const char *calle = current->data.street;
+      int dist = levenshtein_distance(house_name, calle);
 
-        current = houses;
-        while (current != NULL) {
-            const char *abbr = abreviaturas(house_name);
-
-            if (strcasecmp(current->data.street, house_name) == 0 || strcasecmp(current->data.street, abbr) == 0) {
-                printf("%d ", current->data.number);
-            }
-            current = current->next;
+      // Evitamos agregar la misma calle mas de una vez (hay muchas casas por calle)
+      int ya_esta = 0;
+      for (int i = 0; i < MAX_SUGERENCIAS; i++) {
+        if (strcasecmp(sugeridas[i], calle) == 0) {
+          ya_esta = 1;
+          break;
         }
+      }
+      if (ya_esta) {
+        current = current->next;
+        continue;
+      }
 
-        printf("\nEnter the correct house number: \n");
-        int new_number;
-        if (scanf("%d", &new_number) == 1) {
-            search_house(houses, house_name, new_number);
-        } else {
-            printf("[ERROR] Numero invalido\n");
+      // Insertion sort parcial: mantenemos el ranking de las N mejores ordenado por distancia
+      for (int i = 0; i < MAX_SUGERENCIAS; i++) {
+        if (dist < distancias[i]) {
+          // Desplazamos las peores una posicion hacia abajo para hacer lugar
+          for (int j = MAX_SUGERENCIAS - 1; j > i; j--) {
+            distancias[j] = distancias[j - 1];
+            strncpy(sugeridas[j], sugeridas[j - 1], HOUSE_STREET_LENGTH - 1);
+            sugeridas[j][HOUSE_STREET_LENGTH - 1] = '\0';
+          }
+          distancias[i] = dist;
+          strncpy(sugeridas[i], calle, HOUSE_STREET_LENGTH - 1);
+          sugeridas[i][HOUSE_STREET_LENGTH - 1] = '\0';
+          break;
         }
-    } else {
-        printf("[ERROR] House not found\n");
+      }
+
+      current = current->next;
+    }
+
+    printf("[ERROR] Street not found. Similar streets:\n");
+    int total = 0;
+    for (int i = 0; i < MAX_SUGERENCIAS; i++) {
+      if (sugeridas[i][0] != '\0') {
+        printf("  %d. %s\n", i + 1, sugeridas[i]);
+        total++;
+      }
+    }
+
+    // Si hay sugerencias, dejamos que el usuario elija una y reintentamos la busqueda
+    if (total > 0) {
+      printf("Enter the number of the street (0 to cancel): ");
+      int opcion = 0;
+      if (scanf("%d", &opcion) == 1 && opcion >= 1 && opcion <= total) {
+        search_house(houses, sugeridas[opcion - 1], house_number);
+        }
+      }
     }
 }
 

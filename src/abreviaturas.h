@@ -1,5 +1,5 @@
 #ifndef ABREVIATURAS_H
 #define ABREVIATURAS_H
 
-const char* abreviaturas(const char* abreviada);
+void abreviaturas(const char *abreviada, char *resultado, int tam);
 #endif

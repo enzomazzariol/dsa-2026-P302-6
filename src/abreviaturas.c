@@ -2,9 +2,7 @@
 #include <stdio.h>
 #include "abreviaturas.h"
 
-const char* abreviaturas(const char* abreviada){
-    static char final_abreviada[100]; 
-
+void abreviaturas(const char *abreviada, char *resultado, int tam) {
     int variable = -1;
     int longitud = strlen(abreviada);
 
@@ -16,22 +14,25 @@ const char* abreviaturas(const char* abreviada){
     }
 
     if(variable == -1){
-        return abreviada;
+        strncpy(resultado, abreviada, tam - 1);
+        resultado[tam - 1] = '\0';
+        return;
     }
 
     if(abreviada[0] == 'c' || abreviada[0] == 'C'){
-        strcpy(final_abreviada, "carrer ");
+        strncpy(resultado, "carrer ", tam - 1);
     } else if(abreviada[0] == 'p' || abreviada[0] == 'P'){
-        strcpy(final_abreviada, "plaça ");
+        strncpy(resultado, "plaça ", tam - 1);
     } else if(abreviada[0] == 'a' || abreviada[0] == 'A'){
-        strcpy(final_abreviada, "avinguda ");
+        strncpy(resultado, "avinguda ", tam - 1);
     } else if(abreviada[0] == 'r' || abreviada[0] == 'R'){
-        strcpy(final_abreviada, "rambla ");
+        strncpy(resultado, "rambla ", tam - 1);
     } else {
-        return abreviada;
+        strncpy(resultado, abreviada, tam - 1);
+        resultado[tam - 1] = '\0';
+        return;
     }
 
-    strcat(final_abreviada, abreviada + variable + 1);
-
-    return final_abreviada;
+    resultado[tam - 1] = '\0';
+    strncat(resultado, abreviada + variable + 1, tam - strlen(resultado) - 1);
 }
