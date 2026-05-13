@@ -48,8 +48,7 @@ PlaceNode *fetch_places(const char *map_name)
   while (fgets(line, sizeof(line), file))
   {
     Place p;
-    int parsed = sscanf(line, "%36[^,],%49[^,],%49[^,],%lf,%lf",
-                        p.id, p.place, p.amenity, &p.latitude, &p.longitude);
+    int parsed = sscanf(line, "%36[^,],%49[^,],%49[^,],%lf,%lf", p.id, p.place, p.amenity, &p.latitude, &p.longitude);
     if (parsed != 5)
       continue;
 
@@ -60,13 +59,13 @@ PlaceNode *fetch_places(const char *map_name)
   return head;
 }
 
-void search_place(PlaceNode *places, const char *place_name)
+PlaceNode *search_place(PlaceNode *places, const char *place_name)
 {
   PlaceNode *current = places;
   while (current != NULL){
     if(strcasecmp(current->data.place, place_name) == 0){
       printf("Place found: Latitud = %.6f, Longitud = %.6f\n", current->data.latitude, current->data.longitude);
-      return;
+      return current;
     }
     current = current->next;
   }
@@ -127,9 +126,10 @@ void search_place(PlaceNode *places, const char *place_name)
     printf("Enter the number of the place (0 to cancel): ");
     int opcion = 0;
     if (scanf("%d", &opcion) == 1 && opcion >= 1 && opcion <= total) {
-      search_place(places, sugeridas[opcion - 1]);
+      return search_place(places, sugeridas[opcion - 1]);
     }
   }
+  return NULL;
 }
 
 

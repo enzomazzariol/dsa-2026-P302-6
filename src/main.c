@@ -2,6 +2,7 @@
 #include "house.h"
 #include "map.h"
 #include "places.h"
+#include "segments.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -37,14 +38,23 @@ int main(void) {
 
   HouseNode *houses = fetch_houses(map_name);
   PlaceNode *places = fetch_places(map_name);
+  StreetNode *streets = fetch_streets(map_name);
 
   if (places == NULL) {
     printf("[ERROR] No se pudieron cargar los lugares\n");
     free_houses(houses);
+    free_streets(streets);
     return 1;
   }
   if (houses == NULL) {
     printf("[ERROR] No se pudieron cargar las casas\n");
+    free_places(places);
+    free_streets(streets);
+    return 1;
+  }
+  if (streets == NULL) {
+    printf("[ERROR] No se pudieron cargar las calles\n");
+    free_houses(houses);
     free_places(places);
     return 1;
   }
@@ -52,8 +62,10 @@ int main(void) {
   // imprimimos el load y el total de casas
   int total_houses = count_houses(houses);
   int total_places = count_places(places);
+  int total_streets = count_streets(streets);
   printf("\nCasas cargadas correctamente para %s, total: %d\n", map_name, total_houses);
   printf("Lugares cargados correctamente para %s, total: %d\n", map_name, total_places);
+  printf("Calles cargadas correctamente para %s, total: %d\n", map_name, total_streets);
 
   int opcion_user = 0;
   print_map_options();
@@ -82,16 +94,24 @@ int main(void) {
       printf("Enter the name of the place: \n");
       char name_place[256];
       scanf(" %255[^\n]", name_place);
-      search_place(places, name_place);
+      PlaceNode *found = search_place(places, name_place);
+      if (found != NULL) {
+        StreetNode *s = closest_segment(streets, found->data.latitude, found->data.longitude);
+        if (s != NULL) {
+          printf("Closest street: %s\n", s->data.name);
+        }
+      }
       break;
     }
     default:
       free_houses(houses);
       free_places(places);
+      free_streets(streets);
       return 1;
   }
 
   free_houses(houses);
   free_places(places);
+  free_streets(streets);
   return 0;
 }
