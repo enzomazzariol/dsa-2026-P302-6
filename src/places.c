@@ -64,7 +64,7 @@ PlaceNode *search_place(PlaceNode *places, const char *place_name)
   PlaceNode *current = places;
   while (current != NULL){
     if(strcasecmp(current->data.place, place_name) == 0){
-      printf("Place found: Latitud = %.6f, Longitud = %.6f\n", current->data.latitude, current->data.longitude);
+      printf("    Found at (%.6f, %.6f)\n", current->data.latitude, current->data.longitude);
       return current;
     }
     current = current->next;

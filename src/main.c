@@ -98,7 +98,11 @@ int main(void) {
       if (found != NULL) {
         StreetNode *s = closest_segment(streets, found->data.latitude, found->data.longitude);
         if (s != NULL) {
-          printf("Closest street: %s\n", s->data.name);
+          printf("    Closest street: %s\n", s->data.name);
+          printf("    Between %lld (%.6f, %.6f) and %lld (%.6f, %.6f)\n",
+                 s->data.from_id, s->data.from_latitude, s->data.from_longitude,
+                 s->data.to_id, s->data.to_latitude, s->data.to_longitude);
+          print_connected_segments(streets, s);
         }
       }
       break;
