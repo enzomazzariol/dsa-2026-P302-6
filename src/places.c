@@ -1,4 +1,6 @@
 #include "places.h"
+#include "map.h"
+#include "algoritmos.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -29,15 +31,9 @@ void append_place(PlaceNode **head, PlaceNode **tail, Place data) {
 
 PlaceNode *fetch_places(const char *map_name)
 {
-  char file_path[256];
-  snprintf(file_path, sizeof(file_path), "maps/%s/places.txt", map_name);
-
-  FILE *file = fopen(file_path, "r");
+  FILE *file = open_map_file(map_name, "places.txt");
   if (file == NULL)
-  {
-    printf("[ERROR] Fichero no encontrado o ruta incorrecta: %s\n", file_path);
     return NULL;
-  }
 
   PlaceNode *head = init_place_list();
   PlaceNode *tail = NULL;
@@ -61,14 +57,60 @@ PlaceNode *fetch_places(const char *map_name)
 void search_place(PlaceNode *places, const char *place_name)
 {
   PlaceNode *current = places;
-  while (current != NULL){
-    if(strcasecmp(current->data.place, place_name) == 0){
+  while (current != NULL) {
+    if (strcasecmp(current->data.place, place_name) == 0) {
       printf("Place found: Latitud = %.6f, Longitud = %.6f\n", current->data.latitude, current->data.longitude);
       return;
     }
     current = current->next;
   }
-  printf("[ERROR] Place not found\n");
+
+  char sugeridos[MAX_SUGERENCIAS][MAX_SUGGESTION_LEN];
+  int distancias[MAX_SUGERENCIAS];
+
+  for (int i = 0; i < MAX_SUGERENCIAS; i++) {
+    sugeridos[i][0] = '\0';
+    distancias[i] = 9999;
+  }
+
+  current = places;
+  while (current != NULL) {
+    const char *nombre = current->data.place;
+    int dist = levenshtein_distance(place_name, nombre);
+
+    int ya_esta = 0;
+    for (int i = 0; i < MAX_SUGERENCIAS; i++) {
+      if (strcasecmp(sugeridos[i], nombre) == 0) {
+        ya_esta = 1;
+        break;
+      }
+    }
+    if (ya_esta) {
+      current = current->next;
+      continue;
+    }
+
+    for (int i = 0; i < MAX_SUGERENCIAS; i++) {
+      if (dist < distancias[i]) {
+        for (int j = MAX_SUGERENCIAS - 1; j > i; j--) {
+          distancias[j] = distancias[j - 1];
+          strncpy(sugeridos[j], sugeridos[j - 1], MAX_SUGGESTION_LEN - 1);
+          sugeridos[j][MAX_SUGGESTION_LEN - 1] = '\0';
+        }
+        distancias[i] = dist;
+        strncpy(sugeridos[i], nombre, MAX_SUGGESTION_LEN - 1);
+        sugeridos[i][MAX_SUGGESTION_LEN - 1] = '\0';
+        break;
+      }
+    }
+
+    current = current->next;
+  }
+
+  printf("[ERROR] Place not found. Similar places:\n");
+  int opcion = ask_from_suggestions(sugeridos, MAX_SUGERENCIAS);
+  if (opcion >= 0)
+    search_place(places, sugeridos[opcion]);
 }
 
 int count_places(PlaceNode *head)

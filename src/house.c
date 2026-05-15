@@ -1,11 +1,11 @@
 #include "house.h"
+#include "map.h"
 #include "algoritmos.h"
 #include "abreviaturas.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#define MAX_SUGERENCIAS 5
 
 HouseNode *init_house_list() {
   return NULL;
@@ -32,15 +32,9 @@ void append_house(HouseNode **head, HouseNode **tail, House data) {
 
 HouseNode *fetch_houses(const char *map_name)
 {
-  char file_path[256];
-  snprintf(file_path, sizeof(file_path), "maps/%s/houses.txt", map_name);
-
-  FILE *file = fopen(file_path, "r");
+  FILE *file = open_map_file(map_name, "houses.txt");
   if (file == NULL)
-  {
-    printf("[ERROR] Fichero no encontrado o ruta incorrecta: %s\n", file_path);
     return NULL;
-  }
 
   HouseNode *head = init_house_list();
   HouseNode *tail = NULL;
@@ -104,10 +98,9 @@ void search_house(HouseNode *houses, const char *house_name, int house_number) {
     }
   } else {
     // La calle no existe: buscamos las mas parecidas usando distancia de Levenshtein
-    char sugeridas[MAX_SUGERENCIAS][HOUSE_STREET_LENGTH];
+    char sugeridas[MAX_SUGERENCIAS][MAX_SUGGESTION_LEN];
     int distancias[MAX_SUGERENCIAS];
 
-    // Inicializamos con distancia "infinita" para que cualquier calle real entre al ranking
     for (int i = 0; i < MAX_SUGERENCIAS; i++) {
       sugeridas[i][0] = '\0';
       distancias[i] = 9999;
@@ -137,12 +130,12 @@ void search_house(HouseNode *houses, const char *house_name, int house_number) {
           // Desplazamos las peores una posicion hacia abajo para hacer lugar
           for (int j = MAX_SUGERENCIAS - 1; j > i; j--) {
             distancias[j] = distancias[j - 1];
-            strncpy(sugeridas[j], sugeridas[j - 1], HOUSE_STREET_LENGTH - 1);
-            sugeridas[j][HOUSE_STREET_LENGTH - 1] = '\0';
+            strncpy(sugeridas[j], sugeridas[j - 1], MAX_SUGGESTION_LEN - 1);
+            sugeridas[j][MAX_SUGGESTION_LEN - 1] = '\0';
           }
           distancias[i] = dist;
-          strncpy(sugeridas[i], calle, HOUSE_STREET_LENGTH - 1);
-          sugeridas[i][HOUSE_STREET_LENGTH - 1] = '\0';
+          strncpy(sugeridas[i], calle, MAX_SUGGESTION_LEN - 1);
+          sugeridas[i][MAX_SUGGESTION_LEN - 1] = '\0';
           break;
         }
       }
@@ -151,23 +144,10 @@ void search_house(HouseNode *houses, const char *house_name, int house_number) {
     }
 
     printf("[ERROR] Street not found. Similar streets:\n");
-    int total = 0;
-    for (int i = 0; i < MAX_SUGERENCIAS; i++) {
-      if (sugeridas[i][0] != '\0') {
-        printf("  %d. %s\n", i + 1, sugeridas[i]);
-        total++;
-      }
-    }
-
-    // Si hay sugerencias, dejamos que el usuario elija una y reintentamos la busqueda
-    if (total > 0) {
-      printf("Enter the number of the street (0 to cancel): ");
-      int opcion = 0;
-      if (scanf("%d", &opcion) == 1 && opcion >= 1 && opcion <= total) {
-        search_house(houses, sugeridas[opcion - 1], house_number);
-        }
-      }
-    }
+    int opcion = ask_from_suggestions(sugeridas, MAX_SUGERENCIAS);
+    if (opcion >= 0)
+      search_house(houses, sugeridas[opcion], house_number);
+  }
 }
 
 int count_houses(HouseNode *head){ 
